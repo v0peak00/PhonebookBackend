@@ -89,16 +89,14 @@ app.post('/api/persons', (request, response) => {
   
   if(!person.name || !person.number) {
     return response.status(400).json({error: "Missing name or number!"})
-  } else {
-      const nameExists = persons.some(p =>  p.name === person.name)
-    if(!nameExists){
-      const personWithId = {id: id, ...person}
-      persons.concat(...persons, personWithId)
-      response.json(personWithId)
-    } else {
-      return response.status(400).json({error: "Name already exists!"})
-    }
+  } 
+  const nameExists = persons.some(p =>  p.name === person.name)
+  if(nameExists){
+    return response.status(400).json({error: "Name already exists!"})
   }
+  const personWithId = {id: id, ...person}
+  persons = [...persons, personWithId]
+  response.status(201).json(personWithId)
 })
 
 const unknownEndpoint = (request, response) => {
