@@ -1,8 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
+
 const app = express()
 
 app.use(express.json())
+app.use(cors())
 
 morgan.token('personObject', function getPersonObject (req) {
   return JSON.stringify(req.body)
@@ -72,8 +75,8 @@ app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
   const person = persons.find((person) => person.id === id)
   if(person) {
-    persons.filter((person) => person.id !== id)
-    response.status(204).end()
+    persons = persons.filter((person) => person.id !== id)
+    response.status(200).json(person)
   } else {
     response.status(404).end()
   }
@@ -85,7 +88,7 @@ app.post('/api/persons', (request, response) => {
   const person = request.body
   
   if(!person.name || !person.number) {
-    response.status(400).json({error: "Missing name or number!"})
+    return response.status(400).json({error: "Missing name or number!"})
   } else {
       const nameExists = persons.some(p =>  p.name === person.name)
     if(!nameExists){
@@ -93,13 +96,19 @@ app.post('/api/persons', (request, response) => {
       persons.concat(...persons, personWithId)
       response.json(personWithId)
     } else {
-      response.status(400).json({error: "Name already exists!"})
+      return response.status(400).json({error: "Name already exists!"})
     }
   }
 })
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
+}
+
+const personCountandIds = () => {
+  let ids = []
+  ids = persons.map(person => ids.concat(person.id))
+  console.log("persons arr length: " + persons.length + " and id's: " + ids)
 }
 
 app.use(unknownEndpoint)
